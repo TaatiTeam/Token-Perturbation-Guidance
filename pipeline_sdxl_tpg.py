@@ -73,7 +73,7 @@ EXAMPLE_DOC_STRING = """
 
 def make_tpg_block(block_class: Type[torch.nn.Module], do_cfg=True) -> Type[torch.nn.Module]:
 
-    class PrunedBasicTransformerBlock(block_class):
+    class ModifiedBasicTransformerBlock(block_class):
 
         def forward(
             self,
@@ -121,7 +121,7 @@ def make_tpg_block(block_class: Type[torch.nn.Module], do_cfg=True) -> Type[torc
             x_shuffled = x[:, permutation]
             return x_shuffled
 
-    return PrunedBasicTransformerBlock
+    return ModifiedBasicTransformerBlock
 
 if is_invisible_watermark_available():
     from diffusers.pipelines.stable_diffusion_xl.watermark import StableDiffusionXLWatermarker
@@ -1465,62 +1465,3 @@ class StableDiffusionXLTPGPipeline(
             return (image,)
 
         return StableDiffusionXLPipelineOutput(images=image)
-
-
-if __name__ == "__main__":
-    import os
-    from accelerate.utils import set_seed
- 
-    model_info = "tpg_sdxl"
-
-    root_dir = "./samples"
-    output_dir = root_dir + f"/{model_info}_samples_consecutive_generation"
-    os.makedirs(output_dir, exist_ok=True)
-
-    pipe = StableDiffusionXLTPGPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16)
-    pipe = pipe.to("cuda")
-
-    seed = 0
-    set_seed(seed)
-    torch.cuda.manual_seed(seed)
-    generator = torch.Generator("cuda").manual_seed(seed)
-
-    prompts = [
-    "A corgi is standing next to flowers",
-    "A majestic dragon soaring through a sunset sky",
-    "A cozy cottage in an enchanted forest with fairy lights",
-    "An astronaut riding a horse on Mars",
-    "A cyberpunk cityscape at night with neon lights",
-    "A serene Japanese garden during cherry blossom season",
-    "A mystical underwater city with merfolk",
-    "A steampunk-themed flying ship in the clouds",
-    "A magical library with floating books and starry ceiling",
-    "A portrait of a celestial being with cosmos details",
-    "A futuristic metropolis with flying cars",
-    "An ancient tree of life with glowing symbols",
-    "A crystal palace in the northern lights",
-    "A mechanical butterfly in a field of wildflowers",
-    "A post-apocalyptic city reclaimed by nature",
-    "A fantasy potion shop with magical ingredients"
-    ]
-
-    applied_layers_index = ["d6", "d7", "d8", "d9", "d10", "d11", "d12", "d13", "d14", "d15", "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23"]
-    scale = 3.0
-
-    # Conditional
-    for i in range(len(prompts)):
-        image = pipe(prompts[i], tpg_applied_layers_index=applied_layers_index, tpg_scale=scale, guidance_scale=3.0, generator=generator).images[0]
-        prompt_slug = "_".join(prompts[i].lower().split()[:5]).replace("'", "").replace('"', "")
-        output_path = os.path.join(output_dir, f"{model_info}_{prompt_slug}_{i}_1.png")
-        image.save(output_path)
-        print(f"Image saved at: {output_path}")
-
-    # Unconditional
-    n = 50
-    for i in range(n):
-        image = pipe([""], tpg_applied_layers_index=applied_layers_index, tpg_scale=scale, generator=generator).images[0]
-        output_path = os.path.join(output_dir, f"{model_info}_{i}.png")
-        image.save(output_path)
-        print(f"Image saved at: {output_path}")
-
-    
