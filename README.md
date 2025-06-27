@@ -7,15 +7,6 @@ Official implementation of "Token Perturbation Guidance for Diffusion Models"
 
 ![](./assets/uncond_generation.jpg)
 
-## Installation
-
-We use the following versions of `torch` and `diffusers`:
-
-```
-- torch 2.0.1
-- diffusers 0.27.2
-```
-
 ## Get started
 
 This is an example of a Python script:
