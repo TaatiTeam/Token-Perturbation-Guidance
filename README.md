@@ -1,4 +1,5 @@
 # Token-Perturbation-Guidance [NeurIPS 2025]
+<a href="https://rajabi2001.github.io/tpg/"><img src="https://img.shields.io/badge/Project-Page-4B0082"></a>
 <a href="https://arxiv.org/abs/2506.10036"><img src="https://img.shields.io/badge/arXiv-2506.10036-B31B1B"></a>
 
 Official implementation of "Token Perturbation Guidance for Diffusion Models"
